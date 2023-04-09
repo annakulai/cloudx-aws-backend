@@ -8,3 +8,6 @@ coverage
 
 # esbuild directories
 .esbuild
+
+# enviroment variables
+.env

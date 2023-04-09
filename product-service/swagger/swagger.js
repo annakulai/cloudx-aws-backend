@@ -32,6 +32,45 @@
             }
           }
         }
+      },
+      "post": {
+        "summary": "createProduct",
+        "description": "",
+        "operationId": "createProduct.post./products",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Body required in the request",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ProductBody"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "400 response",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "500 response",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
       }
     },
     "/products/{productId}": {
@@ -77,70 +116,11 @@
     }
   },
   "definitions": {
-    "ProductResponse": {
-      "properties": {
-        "id": {
-          "title": "ProductResponse.id",
-          "type": "number"
-        },
-        "title": {
-          "title": "ProductResponse.title",
-          "type": "string"
-        },
-        "price": {
-          "title": "ProductResponse.price",
-          "type": "number"
-        },
-        "description": {
-          "title": "ProductResponse.description",
-          "type": "string"
-        },
-        "category": {
-          "title": "ProductResponse.category",
-          "type": "string"
-        },
-        "image": {
-          "title": "ProductResponse.image",
-          "type": "string"
-        },
-        "rating": {
-          "properties": {
-            "rate": {
-              "title": "ProductResponse.rating.rate",
-              "type": "number"
-            },
-            "count": {
-              "title": "ProductResponse.rating.count",
-              "type": "number"
-            }
-          },
-          "required": [
-            "rate",
-            "count"
-          ],
-          "additionalProperties": false,
-          "title": "ProductResponse.rating",
-          "type": "object"
-        }
-      },
-      "required": [
-        "id",
-        "title",
-        "price",
-        "description",
-        "category",
-        "image",
-        "rating"
-      ],
-      "additionalProperties": false,
-      "title": "ProductResponse",
-      "type": "object"
-    },
     "Product": {
       "properties": {
         "id": {
           "title": "Product.id",
-          "type": "number"
+          "type": "string"
         },
         "title": {
           "title": "Product.title",
@@ -173,6 +153,40 @@
       ],
       "additionalProperties": false,
       "title": "Product",
+      "type": "object"
+    },
+    "ProductBody": {
+      "properties": {
+        "title": {
+          "title": "ProductBody.title",
+          "type": "string"
+        },
+        "price": {
+          "title": "ProductBody.price",
+          "type": "number"
+        },
+        "description": {
+          "title": "ProductBody.description",
+          "type": "string"
+        },
+        "image": {
+          "title": "ProductBody.image",
+          "type": "string"
+        },
+        "count": {
+          "title": "ProductBody.count",
+          "type": "number"
+        }
+      },
+      "required": [
+        "title",
+        "price",
+        "description",
+        "image",
+        "count"
+      ],
+      "additionalProperties": false,
+      "title": "ProductBody",
       "type": "object"
     },
     "Products": {

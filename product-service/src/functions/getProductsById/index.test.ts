@@ -1,9 +1,16 @@
 import { getProductByIdHandler } from './handler';
-import { getProductById } from 'src/service';
+import { productService } from '@libs/dynamodb-connector';
 
 jest.mock('@libs/lambda');
-
-jest.mock('src/service');
+jest.mock('@libs/dynamodb-connector');
+jest.mock('@service/loggerService', () => {
+  return {
+    default: {
+      logRequest: jest.fn(),
+      logError: jest.fn(),
+    },
+  };
+});
 
 const event = {
   pathParameters: {
@@ -13,7 +20,7 @@ const event = {
 
 describe('getProductList handler', () => {
   it('should return success response', async () => {
-    (getProductById as jest.Mock).mockResolvedValue({
+    (productService.getProductById as jest.Mock).mockResolvedValue({
       id: 1,
       title: 'Fjallraven - Foldsack No. 1 Backpack, Fits 15 Laptops',
       price: 109.95,
@@ -36,7 +43,7 @@ describe('getProductList handler', () => {
   });
 
   it('should return error response', async () => {
-    (getProductById as jest.Mock).mockRejectedValue(Error);
+    (productService.getProductById as jest.Mock).mockRejectedValue(Error);
 
     const response = await getProductByIdHandler(event);
 

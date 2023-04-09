@@ -1,18 +1,13 @@
-export type ProductResponse = {
-  id: number;
+export type Product = {
+  id: string;
   title: string;
   price: number;
   description: string;
-  category: string;
   image: string;
-  rating: {
-    rate: number;
-    count: number;
-  };
+  count: number;
 };
 
-export type Product = {
-  id: number;
+export type ProductBody = {
   title: string;
   price: number;
   description: string;
