@@ -1,7 +1,11 @@
+import * as dotenv from 'dotenv';
 import type { AWS } from '@serverless/typescript';
 
 import getProductsList from '@functions/getProductsList';
 import getProductById from '@functions/getProductsById';
+import createProduct from '@functions/createProduct';
+
+dotenv.config();
 
 const serverlessConfiguration: AWS = {
   service: 'product-service',
@@ -21,12 +25,28 @@ const serverlessConfiguration: AWS = {
     environment: {
       AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
       NODE_OPTIONS: '--enable-source-maps --stack-trace-limit=1000',
+      PRODUCTS_TABLE_NAME: process.env.PRODUCTS_TABLE_NAME,
+      STOCKS_TABLE_NAME: process.env.STOCKS_TABLE_NAME,
     },
     stage: 'dev',
     region: 'us-east-1',
     profile: '080108551761_Hanna_Kulai',
+    iamRoleStatements: [
+      {
+        Effect: 'Allow',
+        Action: [
+          'dynamodb:Query',
+          'dynamodb:Scan',
+          'dynamodb:GetItem',
+          'dynamodb:PutItem',
+          'dynamodb:UpdateItem',
+          'dynamodb:DeleteItem',
+        ],
+        Resource: '*',
+      },
+    ],
   },
-  functions: { getProductsList, getProductById },
+  functions: { getProductsList, getProductById, createProduct },
   package: { individually: true },
   custom: {
     esbuild: {

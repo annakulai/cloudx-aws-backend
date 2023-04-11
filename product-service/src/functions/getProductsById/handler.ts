@@ -4,13 +4,16 @@ import {
   successResponse,
 } from '@libs/api-gateway';
 import { middyfy } from '@libs/lambda';
-import { getProductById } from 'src/service';
+import { productService } from '@libs/dynamodb-connector';
+import Logger from '@service/loggerService';
 
 export const getProductByIdHandler = async (event) => {
   try {
+    Logger.logRequest(`Incoming event: ${JSON.stringify(event)}`);
+
     const { productId } = event.pathParameters;
 
-    const product = await getProductById(+productId);
+    const product = await productService.getProductById(productId);
 
     if (product) {
       return successResponse({ ...product });
@@ -18,6 +21,8 @@ export const getProductByIdHandler = async (event) => {
 
     return errorNonFoundResponse('Product not found');
   } catch (error) {
+    Logger.logError('getProductByIdHandler lambda error', error);
+
     return errorResponse({
       message: error?.message,
     });

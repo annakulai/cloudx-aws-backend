@@ -1,9 +1,16 @@
-import { getAllProducts } from 'src/service';
 import { getProductsList } from './handler';
+import { productService } from '@libs/dynamodb-connector';
 
 jest.mock('@libs/lambda');
-
-jest.mock('src/service');
+jest.mock('@libs/dynamodb-connector');
+jest.mock('@service/loggerService', () => {
+  return {
+    default: {
+      logRequest: jest.fn(),
+      logError: jest.fn(),
+    },
+  };
+});
 
 const products = [
   {
@@ -37,18 +44,18 @@ const products = [
 
 describe('getProductList handler', () => {
   it('should return success response', async () => {
-    (getAllProducts as jest.Mock).mockResolvedValue(products);
+    (productService.getAllProducts as jest.Mock).mockResolvedValue(products);
 
-    const response = await getProductsList();
+    const response = await getProductsList({});
 
     expect(response.statusCode).toBe(200);
     expect(JSON.parse(response.body)).toEqual(products);
   });
 
   it('should return error response', async () => {
-    (getAllProducts as jest.Mock).mockRejectedValue(Error);
+    (productService.getAllProducts as jest.Mock).mockRejectedValue(Error);
 
-    const response = await getProductsList();
+    const response = await getProductsList({});
 
     expect(response.statusCode).toBe(500);
     expect(JSON.parse(response.body).message).toEqual(

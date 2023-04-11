@@ -1,13 +1,17 @@
 import { errorResponse, successResponse } from '@libs/api-gateway';
+import { productService } from '@libs/dynamodb-connector';
 import { middyfy } from '@libs/lambda';
-import { getAllProducts } from 'src/service';
+import Logger from '@service/loggerService';
 
-export const getProductsList = async () => {
+export const getProductsList = async (event) => {
   try {
-    const products = await getAllProducts();
+    Logger.logRequest(`Incoming event: ${JSON.stringify(event)}`);
 
-    return successResponse(products);
+    const products = await productService.getAllProducts();
+
+    return successResponse(products, 200);
   } catch (error) {
+    Logger.logError('getProductsList lambda error', error);
     return errorResponse({ message: error?.message });
   }
 };
