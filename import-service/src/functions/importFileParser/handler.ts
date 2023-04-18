@@ -25,18 +25,12 @@ const importFileParser = async (event: S3Event) => {
       });
 
       const file = await s3.send(getCommand);
-      const sdkStream = sdkStreamMixin(file.Body);
-      const results = [];
 
-      sdkStream
-        .pipe(csv())
-        .on('data', (data) => {
-          console.log(data);
-          return results.push(data);
-        })
-        .on('end', () => {
-          console.log(results);
-        });
+      const sdkStream = sdkStreamMixin(file.Body).pipe(csv());
+
+      for await (const data of sdkStream) {
+        console.log(data);
+      }
 
       const copyParams = new CopyObjectCommand({
         Bucket: BUCKET,
