@@ -19,10 +19,13 @@
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.306.0",
+    "@aws-sdk/client-sns": "^3.316.0",
+    "@aws-sdk/client-sqs": "^3.315.0",
     "@aws-sdk/lib-dynamodb": "^3.306.0",
     "@aws-sdk/util-dynamodb": "^3.309.0",
     "@middy/core": "^3.4.0",
     "@middy/http-json-body-parser": "^3.4.0",
+    "aws-sdk-client-mock": "^0.5.2",
     "dotenv": "^16.0.3",
     "joi": "^17.9.1",
     "winston": "^3.8.2"
