@@ -4,6 +4,11 @@ import {
   GetObjectCommand,
   S3,
 } from '@aws-sdk/client-s3';
+import {
+  SQSClient,
+  SendMessageBatchCommand,
+  SendMessageBatchCommandInput,
+} from '@aws-sdk/client-sqs';
 import { S3Event } from 'aws-lambda';
 import csv from 'csv-parser';
 import {
@@ -13,10 +18,12 @@ import {
   uploadedPrefix,
 } from 'src/common/constants';
 import { sdkStreamMixin } from '@aws-sdk/util-stream-node';
+import { v4 as uuidv4 } from 'uuid';
 
 const importFileParser = async (event: S3Event) => {
   try {
     const s3 = new S3({ region: REGION });
+    const SQS = new SQSClient({ region: REGION });
 
     for (const record of event.Records) {
       const getCommand = new GetObjectCommand({
@@ -29,7 +36,13 @@ const importFileParser = async (event: S3Event) => {
       const sdkStream = sdkStreamMixin(file.Body).pipe(csv());
 
       for await (const data of sdkStream) {
-        console.log(data);
+        const input: SendMessageBatchCommandInput = {
+          QueueUrl: process.env.SQS_URL,
+          Entries: [{ Id: uuidv4(), MessageBody: JSON.stringify(data) }],
+        };
+
+        const command = new SendMessageBatchCommand(input);
+        SQS.send(command);
       }
 
       const copyParams = new CopyObjectCommand({
