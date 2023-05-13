@@ -1,31 +1,34 @@
 import { Injectable } from '@nestjs/common';
-
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Carts, Status } from '../../database/entities/carts.entity';
 import { v4 } from 'uuid';
-
-import { Cart } from '../models';
 
 @Injectable()
 export class CartService {
-  private userCarts: Record<string, Cart> = {};
+  constructor(
+    @InjectRepository(Carts)
+    private readonly userCart: Repository<Carts>,
+  ) {}
 
-  findByUserId(userId: string): Cart {
-    return this.userCarts[ userId ];
+  async findByUserId(userId: string): Promise<Carts> {
+    return this.userCart.findOne({
+      where: { user_id: userId, status: Status.OPEN },
+      relations: ['cartItems'],
+    });
   }
 
-  createByUserId(userId: string) {
+  async createByUserId(userId: string): Promise<void | Carts> {
     const id = v4(v4());
-    const userCart = {
+
+    await this.userCart.save({
       id,
-      items: [],
-    };
-
-    this.userCarts[ userId ] = userCart;
-
-    return userCart;
+      user_id: userId,
+    });
   }
 
-  findOrCreateByUserId(userId: string): Cart {
-    const userCart = this.findByUserId(userId);
+  async findOrCreateByUserId(userId: string): Promise<void | Carts> {
+    const userCart = await this.findByUserId(userId);
 
     if (userCart) {
       return userCart;
@@ -34,22 +37,36 @@ export class CartService {
     return this.createByUserId(userId);
   }
 
-  updateByUserId(userId: string, { items }: Cart): Cart {
-    const { id, ...rest } = this.findOrCreateByUserId(userId);
+  async updateByUserId(userId: string, { items }) {
+    const { id, ...rest } = (await this.findOrCreateByUserId(userId)) as Carts;
 
     const updatedCart = {
       id,
       ...rest,
-      items: [ ...items ],
+      cartItems: [...items],
+      updated_at: new Date(),
+    };
+
+    await this.userCart.save(updatedCart);
+
+    const current = await this.findByUserId(userId);
+
+    return current;
+  }
+
+  async removeByUserId(userId): Promise<void> {
+    const current = await this.findByUserId(userId);
+    if (current) await this.userCart.delete({ user_id: userId });
+  }
+
+  async markAsOrderedByUserId(userId: string): Promise<void> {
+    const userCart = await this.findByUserId(userId);
+
+    if (userCart) {
+      await this.userCart.update(
+        { id: userCart.id },
+        { status: Status.ORDERED },
+      );
     }
-
-    this.userCarts[ userId ] = { ...updatedCart };
-
-    return { ...updatedCart };
   }
-
-  removeByUserId(userId): void {
-    this.userCarts[ userId ] = null;
-  }
-
 }
