@@ -1,8 +1,9 @@
-import { importFileParser, importProductsFile } from '@functions/index';
 import type { AWS } from '@serverless/typescript';
 
+import basicAuthorizer from '@functions/basicAuthorizer';
+
 const serverlessConfiguration: AWS = {
-  service: 'import-service',
+  service: 'authorization-service',
   frameworkVersion: '3',
   useDotenv: true,
   plugins: ['serverless-esbuild'],
@@ -16,31 +17,10 @@ const serverlessConfiguration: AWS = {
     environment: {
       AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
       NODE_OPTIONS: '--enable-source-maps --stack-trace-limit=1000',
-      SQS_URL:
-        'https://sqs.us-east-1.amazonaws.com/080108551761/catalogItemsQueue',
-      BASIC_AUTH_ARN: '${env:BASIC_AUTH_ARN}',
+      annakulai: '${env:annakulai}',
     },
-    region: 'us-east-1',
-    profile: '080108551761_Hanna_Kulai',
-    iamRoleStatements: [
-      {
-        Effect: 'Allow',
-        Action: 's3:ListBucket',
-        Resource: 'arn:aws:s3:::import-service-aws-cloudx',
-      },
-      {
-        Effect: 'Allow',
-        Action: 's3:*',
-        Resource: 'arn:aws:s3:::import-service-aws-cloudx/*',
-      },
-      {
-        Effect: 'Allow',
-        Action: 'sqs:*',
-        Resource: 'arn:aws:sqs:us-east-1:080108551761:catalogItemsQueue',
-      },
-    ],
   },
-  functions: { importProductsFile, importFileParser },
+  functions: { basicAuthorizer },
   package: { individually: true },
   custom: {
     esbuild: {
